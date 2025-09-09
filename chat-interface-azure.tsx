@@ -81,7 +81,7 @@ async function handleRAGSearch(query: string, tenant: TenantId): Promise<{ chunk
 }
 
 function ChatInterfaceContent() {
-  const { currentTenant } = useTenant();
+  const { currentTenant, setTenant } = useTenant();
   const [inputValue, setInputValue] = useState("")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -515,7 +515,7 @@ function ChatInterfaceContent() {
     return sectionIndex > 0
   }
 
-  const tenantConfig = getTenantConfig(currentTenant);
+  const tenantConfig = getTenantConfig(currentTenant.id as TenantId);
 
   return (
     <div
@@ -533,9 +533,8 @@ function ChatInterfaceContent() {
           <div className="flex items-center gap-4">
             <h1 className="text-base font-medium text-gray-800">Medical AI Assistant</h1>
             <TenantSelector 
-              value={currentTenant} 
-              onValueChange={(value) => {
-                // Tenant change is handled by the provider
+              onTenantChange={(tenant) => {
+                setTenant(tenant);
               }}
               className="w-[200px]"
             />
@@ -711,7 +710,7 @@ export default function AzureChatInterface() {
   }, []);
 
   return (
-    <TenantProvider onClearChat={handleClearChat}>
+    <TenantProvider>
       <ChatInterfaceContent />
     </TenantProvider>
   );
