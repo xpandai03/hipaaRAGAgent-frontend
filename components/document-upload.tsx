@@ -5,7 +5,6 @@ import { Upload, FileText, CheckCircle, AlertCircle, Loader2, MessageSquare } fr
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useUser } from '@clerk/nextjs';
 
 interface UploadStatus {
   stage: 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
@@ -18,7 +17,6 @@ interface DocumentUploadProps {
 }
 
 export function DocumentUpload({ onStartChatWithDocument }: DocumentUploadProps) {
-  const { user } = useUser();
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     stage: 'idle',
     message: '',

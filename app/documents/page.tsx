@@ -1,13 +1,11 @@
 'use client';
 
 import { DocumentUpload } from '@/components/document-upload';
-import { AuthChatWrapper } from '@/components/auth-chat-wrapper';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FileText, Trash2, ExternalLink, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
 
 interface Document {
   id: string;
@@ -18,16 +16,13 @@ interface Document {
 }
 
 export default function DocumentsPage() {
-  const { user } = useUser();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch user's documents
   useEffect(() => {
-    if (user) {
-      fetchDocuments();
-    }
-  }, [user]);
+    fetchDocuments();
+  }, []);
 
   const fetchDocuments = async () => {
     try {
@@ -84,8 +79,7 @@ export default function DocumentsPage() {
   };
 
   return (
-    <AuthChatWrapper>
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-4">
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -195,6 +189,5 @@ export default function DocumentsPage() {
           </Card>
         </div>
       </div>
-    </AuthChatWrapper>
   );
 }
