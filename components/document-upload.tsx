@@ -76,7 +76,7 @@ export function DocumentUpload({ onStartChatWithDocument }: DocumentUploadProps)
   }, []);
 
   const uploadDocument = async () => {
-    if (!selectedFile || !user) return;
+    if (!selectedFile) return;
 
     try {
       // Stage 1: Upload to server
@@ -88,7 +88,7 @@ export function DocumentUpload({ onStartChatWithDocument }: DocumentUploadProps)
 
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('userId', user.id);
+      formData.append('userId', 'default-user');
 
       // Send to FastAPI-powered endpoint
       const uploadResponse = await fetch('/api/documents/upload-fastapi', {
