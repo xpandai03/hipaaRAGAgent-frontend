@@ -1,5 +1,4 @@
 import type React from "react"
-import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css"
 
 export default function RootLayout({
@@ -8,11 +7,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className="bg-gray-50 overflow-hidden">{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body className="bg-gray-50 overflow-hidden">{children}</body>
+    </html>
   )
 }
 
