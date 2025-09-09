@@ -2,13 +2,19 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
+  "functions": {
+    "app/api/[...route].ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "env": {
     "AZURE_OPENAI_ENDPOINT": "@azure_openai_endpoint",
     "AZURE_OPENAI_API_KEY": "@azure_openai_api_key",
     "AZURE_OPENAI_DEPLOYMENT_NAME": "@azure_openai_deployment_name",
     "AZURE_OPENAI_API_VERSION": "@azure_openai_api_version",
-    "BACKEND_API_URL": "@backend_api_url"
+    "BACKEND_API_URL": "@backend_api_url",
+    "NODE_VERSION": "18.17.0"
   }
 }
