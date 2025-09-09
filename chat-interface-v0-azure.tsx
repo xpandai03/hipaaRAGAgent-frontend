@@ -1,7 +1,5 @@
 "use client"
 
-import "ios-vibrator-pro-max"
-
 import type React from "react"
 import { useState, useRef, useEffect, useCallback } from "react"
 import {
