@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-// import { azureOpenAIClient } from "@/lib/api/azure-openai-client"
+import { azureOpenAIClient } from "@/lib/api/azure-openai-client"
 import { chatStorage, type ChatMetadata } from "@/lib/storage/chat-storage"
 import {
   AlertDialog,

@@ -1,15 +1,7 @@
 /**
  * Azure OpenAI API Client
- * Connects to Azure OpenAI for HIPAA-compliant chat completions
+ * Connects to Azure OpenAI through Next.js API routes for HIPAA-compliant chat completions
  */
-
-import OpenAI from 'openai';
-
-// Environment configuration
-const AZURE_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT || 'https://adavi-mf694jmx-eastus2.cognitiveservices.azure.com';
-const AZURE_API_KEY = process.env.AZURE_OPENAI_API_KEY || 'YOUR_AZURE_API_KEY_HERE';
-const DEPLOYMENT_NAME = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-5-mini';
-const API_VERSION = process.env.AZURE_OPENAI_API_VERSION || '2025-04-01-preview';
 
 export interface Message {
   role: 'system' | 'user' | 'assistant';
@@ -24,31 +16,8 @@ export interface ChatRequest {
 }
 
 class AzureOpenAIClient {
-  private client: OpenAI | null = null;
-
-  constructor() {
-    this.initialize();
-  }
-
-  private initialize() {
-    try {
-      // Configure OpenAI client for Azure
-      this.client = new OpenAI({
-        apiKey: AZURE_API_KEY,
-        baseURL: `${AZURE_ENDPOINT}/openai/deployments/${DEPLOYMENT_NAME}`,
-        defaultQuery: { 'api-version': API_VERSION },
-        defaultHeaders: {
-          'api-key': AZURE_API_KEY,
-        },
-        dangerouslyAllowBrowser: true // Allow browser usage for development
-      });
-    } catch (error) {
-      console.error('Failed to initialize Azure OpenAI client:', error);
-    }
-  }
-
   /**
-   * Stream chat completion
+   * Stream chat completion through API route
    */
   async streamChat(
     request: ChatRequest,
@@ -56,33 +25,61 @@ class AzureOpenAIClient {
     onComplete?: () => void,
     onError?: (error: any) => void
   ) {
-    if (!this.client) {
-      const error = new Error('Azure OpenAI client not initialized.');
-      if (onError) onError(error);
-      else throw error;
-      return;
-    }
-
     try {
-      const stream = await this.client.chat.completions.create({
-        messages: request.messages,
-        model: DEPLOYMENT_NAME,
-        temperature: request.temperature || 0.7,
-        max_tokens: request.max_tokens || 1000,
-        stream: true,
+      const response = await fetch('/api/chat/azure', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...request,
+          stream: true,
+        }),
       });
 
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          onContent(content);
-        }
-        
-        if (chunk.choices[0]?.finish_reason === 'stop') {
-          if (onComplete) onComplete();
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`API request failed: ${error}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              if (onComplete) onComplete();
+              return;
+            }
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                onContent(parsed.content);
+              }
+              if (parsed.error) {
+                throw new Error(parsed.error);
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE message:', e);
+            }
+          }
         }
       }
-      
+
       if (onComplete) onComplete();
     } catch (error) {
       console.error('Azure OpenAI stream error:', error);
@@ -91,10 +88,38 @@ class AzureOpenAIClient {
   }
 
   /**
-   * Check if client is ready
+   * Send non-streaming chat request through API route
+   */
+  async chat(request: ChatRequest): Promise<any> {
+    try {
+      const response = await fetch('/api/chat/azure', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...request,
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`API request failed: ${error}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Azure OpenAI chat error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if client is ready (API routes are available)
    */
   isReady(): boolean {
-    return this.client !== null;
+    return true; // API routes should always be available
   }
 }
 
