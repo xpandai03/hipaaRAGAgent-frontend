@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { TenantSelector, TenantProvider, useTenant } from "@/components/ui/tenant-selector"
+import { TenantSelector, TenantProvider, useTenant } from "@/components/tenant-selector"
 import { azureOpenAIClient, type Message as AzureMessage } from "@/lib/api/azure-openai-client"
 import { getTenantConfig, RAG_FUNCTION_DEFINITION, type TenantId } from "@/lib/config/tenants"
 
@@ -81,7 +81,7 @@ async function handleRAGSearch(query: string, tenant: TenantId): Promise<{ chunk
 }
 
 function ChatInterfaceContent() {
-  const { currentTenant, clearChatHistory } = useTenant();
+  const { currentTenant } = useTenant();
   const [inputValue, setInputValue] = useState("")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -272,7 +272,7 @@ function ChatInterfaceContent() {
 
   const streamAzureResponse = async (userMessage: string) => {
     const messageId = Date.now().toString()
-    const tenantConfig = getTenantConfig(currentTenant);
+    const tenantConfig = getTenantConfig(currentTenant.id as TenantId);
     
     // Build conversation history with tenant system prompt
     const conversationMessages: AzureMessage[] = [
@@ -310,10 +310,7 @@ function ChatInterfaceContent() {
           messages: conversationMessages,
           temperature: 0.7,
           max_tokens: 1000,
-          stream: true,
-          functions: activeButton === 'deepSearch' ? [RAG_FUNCTION_DEFINITION] : undefined,
-          function_call: activeButton === 'deepSearch' ? 'auto' : undefined,
-          tenant: currentTenant
+          stream: true
         },
         (content) => {
           // Handle streaming content
@@ -325,35 +322,7 @@ function ChatInterfaceContent() {
                 : msg
             )
           );
-        },
-        async (name, args) => {
-          // Handle function call for RAG
-          if (name === 'search_practice_documents') {
-            setIsSearchingDocuments(true);
-            try {
-              const parsedArgs = JSON.parse(args);
-              const { chunks, sources } = await handleRAGSearch(parsedArgs.query, currentTenant);
-              
-              // Add context from documents to the response
-              if (chunks.length > 0) {
-                const contextMessage = `\n\n**Based on practice documents:**\n${chunks.join('\n\n')}`;
-                accumulatedContent += contextMessage;
-                
-                setMessages((prev) =>
-                  prev.map((msg) => 
-                    msg.id === messageId 
-                      ? { ...msg, content: accumulatedContent, sources }
-                      : msg
-                  )
-                );
-              }
-            } catch (error) {
-              console.error('Function call error:', error);
-            } finally {
-              setIsSearchingDocuments(false);
-            }
-          }
-        },
+},
         () => {
           // On complete
           setMessages((prev) =>
@@ -481,7 +450,7 @@ function ChatInterfaceContent() {
 
   const renderMessage = (message: Message) => {
     const isCompleted = completedMessages.has(message.id)
-    const tenantConfig = getTenantConfig(currentTenant);
+    const tenantConfig = getTenantConfig(currentTenant.id as TenantId);
 
     return (
       <div key={message.id} className={cn("flex flex-col", message.type === "user" ? "items-end" : "items-start")}>

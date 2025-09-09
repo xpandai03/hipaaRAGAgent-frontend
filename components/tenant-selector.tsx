@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,7 +25,36 @@ const tenantIcons = {
   default: User,
 };
 
-export default function TenantSelector({ onTenantChange, className = '' }: TenantSelectorProps) {
+// Create context for tenant management
+const TenantContext = createContext<{
+  currentTenant: TenantInfo;
+  setTenant: (tenant: TenantInfo) => void;
+} | undefined>(undefined);
+
+export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentTenant, setCurrentTenant] = useState<TenantInfo>(AVAILABLE_TENANTS[0]);
+
+  const setTenant = (tenant: TenantInfo) => {
+    setCurrentTenant(tenant);
+    gptOssClient.setTenant(tenant.id);
+  };
+
+  return (
+    <TenantContext.Provider value={{ currentTenant, setTenant }}>
+      {children}
+    </TenantContext.Provider>
+  );
+};
+
+export const useTenant = () => {
+  const context = useContext(TenantContext);
+  if (!context) {
+    throw new Error('useTenant must be used within a TenantProvider');
+  }
+  return context;
+};
+
+export function TenantSelector({ onTenantChange, className = '' }: TenantSelectorProps) {
   const [currentTenant, setCurrentTenant] = useState<TenantInfo>(AVAILABLE_TENANTS[0]);
   const [isHealthy, setIsHealthy] = useState(true);
 
@@ -108,3 +137,5 @@ export default function TenantSelector({ onTenantChange, className = '' }: Tenan
     </div>
   );
 }
+
+export default TenantSelector;

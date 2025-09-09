@@ -164,7 +164,6 @@ export default function SimplifiedChatPage() {
             )
           );
         },
-        undefined,
         () => {
           // On complete
           if (currentThreadId) {
