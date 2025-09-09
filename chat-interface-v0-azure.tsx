@@ -74,7 +74,7 @@ export default function ChatInterfaceV0Azure() {
   const selectionStateRef = useRef<{ start: number | null; end: number | null }>({ start: null, end: null })
   
   // Chat history states
-  const [showSidebar, setShowSidebar] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(true)
   const [savedChats, setSavedChats] = useState<ChatMetadata[]>([])
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
