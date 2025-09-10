@@ -163,7 +163,7 @@ export default function ChatInterfaceSimple() {
       }, 200);
       
       // Call the backend API
-      const response = await fetch('http://localhost:8000/api/chat/send', {
+      const response = await fetch('/api/chat/fastapi', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
