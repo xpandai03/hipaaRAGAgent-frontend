@@ -1,5 +1,5 @@
-import ChatInterfaceV0Azure from '@/chat-interface-v0-azure';
+import ChatInterfaceSimple from '@/chat-interface-simple';
 
 export default function ChatPage() {
-  return <ChatInterfaceV0Azure />;
+  return <ChatInterfaceSimple />;
 }

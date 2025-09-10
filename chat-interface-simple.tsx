@@ -1,6 +1,5 @@
 'use client';
 
-import 'ios-vibrator-pro-max';
 import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import {
@@ -160,7 +159,7 @@ export default function ChatInterfaceSimple() {
       
       // Add vibration when streaming begins
       setTimeout(() => {
-        navigator.vibrate(50);
+        // navigator.vibrate(50);
       }, 200);
       
       // Call the backend API
@@ -215,7 +214,7 @@ export default function ChatInterfaceSimple() {
                   setCompletedMessages((prev) => new Set(prev).add(messageId));
                   
                   // Add vibration when streaming ends
-                  navigator.vibrate(50);
+                  // navigator.vibrate(50);
                   
                   // Reset streaming state
                   setStreamingContent('');
@@ -275,7 +274,7 @@ export default function ChatInterfaceSimple() {
     e.preventDefault();
     if (inputValue.trim() && !isStreaming) {
       // Add vibration when message is submitted
-      navigator.vibrate(50);
+      // navigator.vibrate(50);
       
       const userMessage = inputValue.trim();
       
